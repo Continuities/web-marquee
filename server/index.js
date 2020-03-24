@@ -10,7 +10,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => res.send(`I'm a server.`));
 app.post('/', (req, res) => {
-  console.log(req.body.message);
+  console.log(`RX: ${req.body.message}`);
+  serial.write(`${req.body.message}\n`);
   res.sendStatus(200);
 });
 
