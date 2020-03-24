@@ -51,11 +51,12 @@
     (function() {
       const form = document.getElementById('content');
       const input = document.getElementById('input');
-      form.addEventListener('submit', () => {
+      form.addEventListener('submit', event => {
+        event.preventDefault();
         console.log(input.value);
         const message = input.value;
         input.value = "";
-        fetch('http://localhost:3000', {
+        fetch('/', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json'
