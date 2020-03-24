@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web Marquee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body, html {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        background: black;
+        box-sizing: border-box;
+      }
+
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      #content {
+        margin: 0 10%;
+      }
+
+      #input {
+        width: 100%;
+        padding: 20px 40px;
+        border-radius: 10px;
+        border: none;
+        font-size: 24px;
+      }
+      #input:focus {
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="content" action="#">
+      <input 
+        id="input" 
+        type="text" 
+        maxlength="32" 
+        placeholder="Write a thing!"
+      >
+    </form>
+    <script type="text/javascript">
+    (function() {
+      const form = document.getElementById('content');
+      const input = document.getElementById('input');
+      form.addEventListener('submit', () => {
+        console.log(input.value);
+        const message = input.value;
+        input.value = "";
+        fetch('http://localhost:3000', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: `{ "message": "${message}" }`
+        });
+      });
+    })();
+    </script>
+  </body>
+</html>
