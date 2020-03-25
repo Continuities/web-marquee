@@ -10,7 +10,7 @@
 #endif
 
 #define BUFFER_SIZE 32
-#define BRIGHTNESS 64
+#define BRIGHTNESS 32
 #define DATAPIN  4
 #define CLOCKPIN 5
 
@@ -35,7 +35,7 @@ Adafruit_DotStarMatrix matrix = Adafruit_DotStarMatrix(
   32, 8, DATAPIN, CLOCKPIN,
   DS_MATRIX_TOP     + DS_MATRIX_LEFT +
   DS_MATRIX_COLUMNS + DS_MATRIX_ZIGZAG,
-  DOTSTAR_BRG);
+  DOTSTAR_BGR);
 
 const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
