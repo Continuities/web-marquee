@@ -21,21 +21,34 @@ app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+function sendNextMessage() {
+  const msg = messageQueue.next();
+  serial.write(`${msg}\n`);
+  console.log(`TX: [${messageQueue.size()}] "${msg}"`);
+  canSend = false;
+}
+
 let currentMessage = '';
+let canSend = false;
 parser.on('data', data => {
+  
+  // Update the current scrolling message
   currentMessage = data;
-  // Send the next queued message, if there is one
-  if (messageQueue.hasNext()) {
-    const msg = messageQueue.next();
-    serial.write(`${msg}\n`);
-    console.log(`TX: [${messageQueue.size()}] "${msg}"`);
-  }
+
   // Broadcast the current message to clients
   wss.clients.forEach(c => {
     if (c.readyState === WebSocket.OPEN) {
       c.send(currentMessage);
     }
   });
+
+  // Send the next queued message, if there is one
+  if (messageQueue.hasNext()) {
+    sendNextMessage();
+  }
+  else {
+    canSend = true;
+  }
 });
 
 wss.on('connection', ws => {
@@ -46,6 +59,10 @@ wss.on('connection', ws => {
 app.post('/', (req, res) => {
   messageQueue.push(req.body.message);
   console.log(`RX: [${messageQueue.size()}] "${req.body.message}"`);
+  if (canSend) {
+    // If we can, send it right away
+    sendNextMessage();
+  }
   res.sendStatus(200);
 });
 

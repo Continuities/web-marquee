@@ -37,6 +37,10 @@ void setup() {
   matrix.setBrightness(BRIGHTNESS);
   matrix.setTextColor(colors[0]);
   setMessage("F*ck COVID-19");
+  sendState();
+}
+
+void sendState() {
   Serial.println(message);
 }
 
@@ -91,7 +95,7 @@ void loop() {
   matrix.print(message);
   if(--x < -messageLength) {
     nextMessage();
-    Serial.println(message);
+    sendState();
     x = matrix.width();
     if(++pass >= 3) pass = 0;
     matrix.setTextColor(colors[pass]);
