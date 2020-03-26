@@ -9,27 +9,11 @@
  #define PSTR // Make Arduino Due happy
 #endif
 
-#define BUFFER_SIZE 32
+#define BUFFER_SIZE 140
 #define BRIGHTNESS 32
 #define DATAPIN  4
 #define CLOCKPIN 5
-
-// MATRIX DECLARATION:
-// Parameter 1 = width of DotStar matrix
-// Parameter 2 = height of matrix
-// Parameter 3 = pin number (most are valid)
-// Parameter 4 = matrix layout flags, add together as needed:
-//   DS_MATRIX_TOP, DS_MATRIX_BOTTOM, DS_MATRIX_LEFT, DS_MATRIX_RIGHT:
-//     Position of the FIRST LED in the matrix; pick two, e.g.
-//     DS_MATRIX_TOP + DS_MATRIX_LEFT for the top-left corner.
-//   DS_MATRIX_ROWS, DS_MATRIX_COLUMNS: LEDs are arranged in horizontal
-//     rows or in vertical columns, respectively; pick one or the other.
-//   DS_MATRIX_PROGRESSIVE, DS_MATRIX_ZIGZAG: all rows/columns proceed
-//     in the same order, or alternate lines reverse direction; pick one.
-//   See example below for these values in action.
-// Parameter 5 = pixel type:
-//   DOTSTAR_BRG  Pixels are wired for BRG bitstream (most DotStar items)
-//   DOTSTAR_GBR  Pixels are wired for GBR bitstream (some older DotStars)
+#define MESSAGE_QUEUE 3
 
 Adafruit_DotStarMatrix matrix = Adafruit_DotStarMatrix(
   32, 8, DATAPIN, CLOCKPIN,
@@ -41,8 +25,9 @@ const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
 
 char message[BUFFER_SIZE];
-char nextMessage[BUFFER_SIZE];
-bool newMessage = false;
+char messageQueue[MESSAGE_QUEUE][BUFFER_SIZE];
+int queueReadIndex = 0;
+int queueWriteIndex = 0;
 int messageLength = 0;
 
 void setup() {
@@ -51,12 +36,15 @@ void setup() {
   matrix.setTextWrap(false);
   matrix.setBrightness(BRIGHTNESS);
   matrix.setTextColor(colors[0]);
-  setMessage("FUCK COVID");
+  setMessage("F*ck COVID-19");
+  Serial.println(message);
 }
 
-void setNextMessage(char* m) {\
-  strncpy(nextMessage, m, BUFFER_SIZE);
-  newMessage = true;
+void queueMessage(char*m) {
+  strncpy(messageQueue[queueWriteIndex++], m, BUFFER_SIZE);
+  if (queueWriteIndex >= MESSAGE_QUEUE - 1) {
+    queueWriteIndex = 0;
+  }
 }
 
 void setMessage(char* m) {
@@ -66,13 +54,24 @@ void setMessage(char* m) {
   messageLength = w;
 }
 
+void nextMessage() {
+  if (queueWriteIndex == queueReadIndex) {
+    // Nothing queued
+    return;
+  }
+  setMessage(messageQueue[queueReadIndex++]);
+  if (queueReadIndex >= MESSAGE_QUEUE - 1) {
+    queueReadIndex = 0;
+  }
+}
+
 char buff[BUFFER_SIZE];
 int bufIndex = 0;
 void readChar() {
   if(Serial.available() > 0 ){
     char c = Serial.read();
     if (c == '\n') {
-      setNextMessage(buff);
+      queueMessage(buff);
       bufIndex = 0;
       strncpy(buff, "", BUFFER_SIZE);
     }
@@ -91,10 +90,8 @@ void loop() {
   matrix.setCursor(x, 0);
   matrix.print(message);
   if(--x < -messageLength) {
-    if (newMessage) {
-      setMessage(nextMessage);
-      newMessage = false;
-    }
+    nextMessage();
+    Serial.println(message);
     x = matrix.width();
     if(++pass >= 3) pass = 0;
     matrix.setTextColor(colors[pass]);

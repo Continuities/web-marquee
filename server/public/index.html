@@ -8,7 +8,7 @@
         height: 100%;
         padding: 0;
         margin: 0;
-        background: black;
+        background: #222;
         box-sizing: border-box;
       }
 
@@ -24,6 +24,9 @@
 
       #content {
         margin: 0 10%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
 
       #input {
@@ -36,10 +39,19 @@
       #input:focus {
         outline: none;
       }
+      #display {
+        font-family: monospace;
+        color: #FF4136;
+        font-size: 80px;
+        margin-bottom: 10px;
+        background: black;
+        width: 250px;
+      }
     </style>
   </head>
   <body>
     <form id="content" action="#">
+      <marquee scrollamount="8" id="display"></marquee>
       <input 
         id="input" 
         type="text" 
@@ -47,24 +59,6 @@
         placeholder="Write a thing!"
       >
     </form>
-    <script type="text/javascript">
-    (function() {
-      const form = document.getElementById('content');
-      const input = document.getElementById('input');
-      form.addEventListener('submit', event => {
-        event.preventDefault();
-        console.log(input.value);
-        const message = input.value;
-        input.value = "";
-        fetch('/', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json'
-          },
-          body: `{ "message": "${message}" }`
-        });
-      });
-    })();
-    </script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>
