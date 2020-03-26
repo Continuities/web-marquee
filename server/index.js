@@ -1,4 +1,4 @@
-const SERIAL_PORT = '/dev/tty.usbmodem14101'; //'/dev/ttyACM0';
+const SERIAL_PORT = '/dev/ttyACM0';
 
 const SerialPort = require('serialport');
 const Readline = require('@serialport/parser-readline');
