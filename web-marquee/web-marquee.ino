@@ -13,7 +13,7 @@
 #define BRIGHTNESS 32
 #define DATAPIN  4
 #define CLOCKPIN 5
-#define MESSAGE_QUEUE 3
+#define SCROLL_SPEED 100
 
 Adafruit_DotStarMatrix matrix = Adafruit_DotStarMatrix(
   32, 8, DATAPIN, CLOCKPIN,
@@ -25,10 +25,10 @@ const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
 
 char message[BUFFER_SIZE];
-char messageQueue[MESSAGE_QUEUE][BUFFER_SIZE];
-int queueReadIndex = 0;
-int queueWriteIndex = 0;
+char next[BUFFER_SIZE];
+bool hasNext = false;
 int messageLength = 0;
+long lastScroll = millis();
 
 void setup() {
   Serial.begin(9600);
@@ -41,10 +41,8 @@ void setup() {
 }
 
 void queueMessage(char*m) {
-  strncpy(messageQueue[queueWriteIndex++], m, BUFFER_SIZE);
-  if (queueWriteIndex >= MESSAGE_QUEUE - 1) {
-    queueWriteIndex = 0;
-  }
+  strncpy(next, m, BUFFER_SIZE);
+  hasNext = true;
 }
 
 void setMessage(char* m) {
@@ -55,14 +53,13 @@ void setMessage(char* m) {
 }
 
 void nextMessage() {
-  if (queueWriteIndex == queueReadIndex) {
+  if (!hasNext) {
     // Nothing queued
     return;
   }
-  setMessage(messageQueue[queueReadIndex++]);
-  if (queueReadIndex >= MESSAGE_QUEUE - 1) {
-    queueReadIndex = 0;
-  }
+  setMessage(next);
+  strncpy(next, "", BUFFER_SIZE);
+  hasNext = false;
 }
 
 char buff[BUFFER_SIZE];
@@ -86,6 +83,9 @@ int pass = 0;
 
 void loop() {
   readChar();
+  if (millis() - lastScroll < SCROLL_SPEED) {
+    return;
+  }
   matrix.fillScreen(0);
   matrix.setCursor(x, 0);
   matrix.print(message);
@@ -97,5 +97,5 @@ void loop() {
     matrix.setTextColor(colors[pass]);
   }
   matrix.show();
-  delay(100);
+  lastScroll = millis();
 }
