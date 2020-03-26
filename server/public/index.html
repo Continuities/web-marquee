@@ -8,7 +8,7 @@
         height: 100%;
         padding: 0;
         margin: 0;
-        background: #222;
+        background: #333;
         box-sizing: border-box;
       }
 
@@ -41,23 +41,40 @@
       }
       #display {
         font-family: monospace;
-        color: #FF4136;
         font-size: 80px;
         margin-bottom: 10px;
         background: black;
         width: 250px;
+      }
+      #inputs {
+        width: 100%;
+        display: flex;
+      }
+      #display, #inputs > * {
+        border: none;
+        box-shadow: 0px 0px 5px 0px rgba(255,255,255,0.75);
+        background: #222;
+      }
+      #colour {
+        height: 68px;
+        width: 68px;
+        border-radius: 10px;
+        margin-left: 10px;
       }
     </style>
   </head>
   <body>
     <form id="content" action="#">
       <marquee scrollamount="8" id="display"></marquee>
-      <input 
-        id="input" 
-        type="text" 
-        maxlength="140" 
-        placeholder="Write a thing!"
-      >
+      <section id="inputs">
+        <input 
+          id="input" 
+          type="text" 
+          maxlength="140" 
+          placeholder="Write a thing!"
+        >
+        <input id="colour" value="#FF4136" type="color">
+      </section>
     </form>
     <script type="module" src="main.js"></script>
   </body>

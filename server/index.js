@@ -1,4 +1,4 @@
-const SERIAL_PORT = '/dev/ttyACM0';
+const SERIAL_PORT = '/dev/tty.usbmodem14201';//'/dev/ttyACM0';
 
 const SerialPort = require('serialport');
 const Readline = require('@serialport/parser-readline');
@@ -23,22 +23,23 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 function sendNextMessage() {
   const msg = messageQueue.next();
-  serial.write(`${msg}\n`);
-  console.log(`TX: [${messageQueue.size()}] "${msg}"`);
+  serial.write(`${msg.colour}|${msg.text}\n`);
+  console.log(`TX: [${messageQueue.size()}] "${msg.colour}|${msg.text}"`);
   canSend = false;
 }
 
 let currentMessage = '';
+let currentColour = '';
 let canSend = false;
 parser.on('data', data => {
-  
+
   // Update the current scrolling message
-  currentMessage = data;
+  [ currentColour, currentMessage ] = data.split('|');
 
   // Broadcast the current message to clients
   wss.clients.forEach(c => {
     if (c.readyState === WebSocket.OPEN) {
-      c.send(currentMessage);
+      c.send(data);
     }
   });
 
@@ -53,12 +54,15 @@ parser.on('data', data => {
 
 wss.on('connection', ws => {
   withPing(ws);
-  ws.send(currentMessage);
+  ws.send(`${currentColour}|${currentMessage}`);
 });
 
 app.post('/', (req, res) => {
-  messageQueue.push(req.body.message);
-  console.log(`RX: [${messageQueue.size()}] "${req.body.message}"`);
+  messageQueue.push({
+    text: req.body.message,
+    colour: req.body.colour
+  });
+  console.log(`RX: [${messageQueue.size()}] "${req.body.colour}|${req.body.message}"`);
   if (canSend) {
     // If we can, send it right away
     sendNextMessage();
