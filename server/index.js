@@ -15,7 +15,7 @@ const wss = new WebSocket.Server({ server });
 const port = 3000;
 const serial = new SerialPort(SERIAL_PORT, { baudRate: 9600 });
 const parser = serial.pipe(new Readline({ delimiter: '\r\n' }));
-const messageQueue = CircularQueue(5);
+const messageQueue = CircularQueue(50);
 
 app.use(express.static('public'));
 app.use(bodyParser.json());
