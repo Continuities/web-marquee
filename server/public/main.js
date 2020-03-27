@@ -4,8 +4,8 @@ const SCROLL_RATE = 1 / 100; // pixels per second
 
 const socket = ReconnectingWebSocket(`ws://${window.location.host}`);
 socket.onmessage = e => {
-  const [ colour, message ] = e.data.split('|');
-  updateMessage(message);
+  const [ colour, durationMillis, message ] = e.data.split('|');
+  updateMessage(message, durationMillis);
   display.style.color = `#${colour}`;
 };
 
@@ -14,14 +14,12 @@ const input = document.getElementById('input');
 const display = document.getElementById('inner-display');
 const colour = document.getElementById('colour');
 
-function updateMessage(newMessage) {
+function updateMessage(newMessage, durationMillis) {
   display.style.animation = 'none';
   display.offsetHeight; /* trigger reflow */
   display.style.animation = null; 
   display.innerText = newMessage;
-  const width = display.clientWidth;
-  const scrollDuration = SCROLL_RATE * width;
-  display.style.animationDuration = `${scrollDuration}s`;
+  display.style.animationDuration = `${durationMillis / 1000}s`;
 }
 
 window.update = updateMessage;

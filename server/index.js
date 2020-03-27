@@ -1,4 +1,4 @@
-const SERIAL_PORT = '/dev/ttyACM0';
+const SERIAL_PORT = '/dev/tty.usbmodem14201'; //'/dev/ttyACM0';
 
 const SerialPort = require('serialport');
 const Readline = require('@serialport/parser-readline');
@@ -28,13 +28,11 @@ function sendNextMessage() {
   canSend = false;
 }
 
-let currentMessage = '';
-let currentColour = '';
+let currentData = '';
 let canSend = false;
 parser.on('data', data => {
 
-  // Update the current scrolling message
-  [ currentColour, currentMessage ] = data.split('|');
+  currentData = data;
 
   // Broadcast the current message to clients
   wss.clients.forEach(c => {
@@ -54,7 +52,7 @@ parser.on('data', data => {
 
 wss.on('connection', ws => {
   withPing(ws);
-  ws.send(`${currentColour}|${currentMessage}`);
+  ws.send(currentData);
 });
 
 app.post('/', (req, res) => {

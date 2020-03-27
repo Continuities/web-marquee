@@ -10,7 +10,7 @@
 #define BRIGHTNESS 32
 #define DATAPIN  4
 #define CLOCKPIN 5
-#define SCROLL_SPEED 100
+#define SCROLL_SPEED 150
 
 Adafruit_DotStarMatrix matrix = Adafruit_DotStarMatrix(
   32, 8, DATAPIN, CLOCKPIN,
@@ -40,7 +40,10 @@ void setup() {
 }
 
 void sendState() {
+  int scrollDuration = SCROLL_SPEED * (messageLength + matrix.width());
   Serial.print(currentMessage.colour);
+  Serial.print("|");
+  Serial.print(scrollDuration);
   Serial.print("|");
   Serial.println(currentMessage.text);
 }
@@ -101,6 +104,7 @@ uint16_t parseHexColour(char *hex) {
 
 int x = matrix.width();
 void loop() {
+  long tick = millis();
   readChar();
   if (millis() - lastScroll < SCROLL_SPEED) {
     return;
@@ -114,5 +118,5 @@ void loop() {
     x = matrix.width();
   }
   matrix.show();
-  lastScroll = millis();
+  lastScroll = tick;
 }
