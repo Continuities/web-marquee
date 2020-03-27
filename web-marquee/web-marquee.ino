@@ -40,7 +40,8 @@ void setup() {
 }
 
 void sendState() {
-  int scrollDuration = SCROLL_SPEED * (messageLength + matrix.width());
+  long scrollDuration = SCROLL_SPEED * (long)(messageLength + matrix.width());
+  Serial.println(scrollDuration);
   Serial.print(currentMessage.colour);
   Serial.print("|");
   Serial.print(scrollDuration);
