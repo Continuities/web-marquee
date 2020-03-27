@@ -15,9 +15,6 @@ const display = document.getElementById('inner-display');
 const colour = document.getElementById('colour');
 
 function updateMessage(newMessage) {
-  if (display.innerText === newMessage) {
-    return;
-  }
   display.style.animation = 'none';
   display.offsetHeight; /* trigger reflow */
   display.style.animation = null; 
